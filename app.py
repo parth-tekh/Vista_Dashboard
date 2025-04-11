@@ -1122,7 +1122,33 @@ def update_historical_graphs(selected_countries, selected_years, selected_indica
             html.P("Indicators unavailable due to error."),
             html.P("Indicator descriptions unavailable due to error.")
         )
+# Toggle Metrics Descriptions visibility
+@app.callback(
+    Output('metrics-descriptions', 'style'),
+    Input('toggle-metrics-desc', 'n_clicks'),
+    prevent_initial_call=True
+)
+def toggle_metrics_descriptions(n_clicks):
+    if n_clicks is None:
+        return {'padding': '20px', 'display': 'none'}
+    if n_clicks % 2 == 1:
+        return {'padding': '20px', 'display': 'block'}
+    else:
+        return {'padding': '20px', 'display': 'none'}
 
+# Toggle Indicators Descriptions visibility
+@app.callback(
+    Output('indicators-descriptions', 'style'),
+    Input('toggle-indicators-desc', 'n_clicks'),
+    prevent_initial_call=True
+)
+def toggle_indicators_descriptions(n_clicks):
+    if n_clicks is None:
+        return {'padding': '20px', 'display': 'none'}
+    if n_clicks % 2 == 1:
+        return {'padding': '20px', 'display': 'block'}
+    else:
+        return {'padding': '20px', 'display': 'none'}
 # Toggle CSV dropdown visibility
 @app.callback(
     Output('csv-dropdown-container', 'style'),
