@@ -43,7 +43,7 @@ EVENT_SEVERITY_WEIGHTS_REDDIT = {
 }
 # Load historical data
 try:
-    df = pd.read_csv('data_output/annual_data_v3.1.csv')
+    df = pd.read_csv('data/annual_data_v3.1.csv')
     logger.info(f"Loaded historical data with {len(df)} rows.")
 except FileNotFoundError as e:
     logger.error(f"Error: Historical data file not found: {e}")
@@ -51,8 +51,8 @@ except FileNotFoundError as e:
 
 # CSV file options for news data
 CSV_OPTIONS = {
-    '29 March': 'news_data/analysed_articles_29_march.csv',
-    '8 April': 'news_data/analysed_articles_8_april.csv'
+    '29 March': 'data/analysed_articles_29_march.csv',
+    '8 April': 'data/analysed_articles_8_april.csv'
 }
 
 # Function to load news data
@@ -68,7 +68,7 @@ def load_news_data(csv_path):
         return pd.DataFrame()
 
 try:
-    reddit_df = pd.read_csv('C696/data/un-integrated/gemini_redditv2.csv')  # Update path to your new data file
+    reddit_df = pd.read_csv('data/gemini_redditv2.csv')  # Update path to your new data file
     # Process migration_intent and country columns
     reddit_df['migration_intent'] = reddit_df['migration_intent'].apply(
         lambda x: ast.literal_eval(x) if isinstance(x, str) else x
