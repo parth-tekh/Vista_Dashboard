@@ -788,6 +788,7 @@ def create_word_cloud_plot(df, title, text_column='title'):
 # Initialize Dash app
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
 app.title = "VISTA Dashboard"
+server = app.server
 
 # Layout
 app.layout = html.Div([
@@ -1239,4 +1240,5 @@ def update_sentiment_graphs(data_source, selected_countries, csv_path, reddit_ye
         return plot_reddit_graphs(filtered_df, reddit_year)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    #app.run(debug=True)
+    app.run(host='0.0.0.0', port=8050)
