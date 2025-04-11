@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from dash import Dash, dcc, html, Input, Output
@@ -510,206 +511,162 @@ def plot_reddit_graphs(filtered_df, selected_year):
     # Check if this is a United States-only filter
     is_us_only = len(filtered_df['country'].unique()) == 1 and filtered_df['country'].iloc[0] == 'United States'
     
-    # Sentiment Distribution (unchanged)
+    # Sentiment Distribution
     sentiment_counts = filtered_df['sentiment'].value_counts().sort_index()
-    if sentiment_counts.empty:
-        fig_sentiment = go.Figure()
-    else:
-        sentiment_df = sentiment_counts.reset_index()
-        sentiment_df.columns = ['Sentiment Score', 'Number of Threads']
-        fig_sentiment = px.bar(
-            sentiment_df,
-            x='Sentiment Score',
-            y='Number of Threads',
-            color='Sentiment Score',
-            color_continuous_scale='RdYlGn',
-            title="Sentiment Distribution of Threads (2025)"
-        )
-        fig_sentiment.update_layout(
-            xaxis_title="Sentiment Score (0 to 100)",
-            yaxis_title="Number of Threads",
-            plot_bgcolor='white',
-            paper_bgcolor='white',
-            xaxis=dict(tickmode='linear', dtick=5, range=[0, 100]),
-            height=500,
-            width=900
-        )
+    fig_sentiment = go.Figure() if sentiment_counts.empty else px.bar(
+        sentiment_counts.reset_index(),
+        x='sentiment', y='count', color='sentiment',
+        color_continuous_scale='RdYlGn', title="Sentiment Distribution of Threads (2025)"
+    ).update_layout(
+        xaxis_title="Sentiment Score (0 to 100)", yaxis_title="Number of Threads",
+        plot_bgcolor='white', paper_bgcolor='white',
+        xaxis=dict(tickmode='linear', dtick=5, range=[0, 100]),
+        height=550, width=900 if is_us_only else 900  # Adjust width for US case
+    )
     
-    # Event Distribution (modified for US)
+    # Event Distribution
     event_counts = filtered_df.groupby(['country', 'event_type']).size().reset_index(name='count')
     if event_counts.empty:
         fig_events = go.Figure()
     else:
         if is_us_only:
-            # For United States: Event types on x-axis, single bars
             us_event_counts = filtered_df['event_type'].value_counts().reset_index()
-            us_event_counts.columns = ['event_type', 'count']
             fig_events = px.bar(
-                us_event_counts,
-                x='event_type',
-                y='count',
-                title="Event Type Distribution (United States, 2025)",
-                color='event_type',
-                color_discrete_sequence=px.colors.qualitative.Plotly  # Distinct colors for each event
-            )
-            fig_events.update_layout(
-                xaxis_title="Event Type",
-                yaxis_title="Number of Threads",
-                plot_bgcolor='white',
-                paper_bgcolor='white',
-                height=500,
-                width=900,
-                showlegend=False  # Hide legend since each bar is a unique event
+                us_event_counts, x='event_type', y='count', color='event_type',
+                color_discrete_sequence=px.colors.qualitative.Plotly,
+                title="Event Type Distribution (United States, 2025)"
+            ).update_layout(
+                xaxis_title="Event Type", yaxis_title="Number of Threads",
+                plot_bgcolor='white', paper_bgcolor='white',
+                height=550, width=900, showlegend=False
             )
         else:
-            # For other options: Countries on x-axis, stacked by event type
             fig_events = px.bar(
-                event_counts,
-                x='country',
-                y='count',
-                color='event_type',
-                title="Event Type Distribution by Country (2025)",
-                barmode='stack'
-            )
-            fig_events.update_layout(
-                xaxis_title="Country",
-                yaxis_title="Number of Threads",
-                plot_bgcolor='white',
-                paper_bgcolor='white',
-                height=500,
-                width=900
+                event_counts, x='country', y='count', color='event_type',
+                title="Event Type Distribution by Country (2025)", barmode='stack'
+            ).update_layout(
+                xaxis_title="Country", yaxis_title="Number of Threads",
+                plot_bgcolor='white', paper_bgcolor='white',
+                height=550, width=900
             )
     
-    # Migration Intent Presence (unchanged)
+    # Migration Intent Presence
     migration_counts = filtered_df['migration_present'].value_counts()
-    if migration_counts.empty:
-        fig_migration = go.Figure()
-    else:
-        fig_migration = px.bar(
-            x=migration_counts.index,
-            y=migration_counts.values,
-            title="Migration Intent Presence in Threads (2025)",
-            color=migration_counts.index,
-            color_discrete_map={'not present': 'lightcoral', 'implicit': 'lightblue', 'explicit': 'lightgreen'}
-        )
-        fig_migration.update_layout(
-            xaxis_title="Migration Intent",
-            yaxis_title="Number of Threads",
-            plot_bgcolor='white',
-            paper_bgcolor='white',
-            height=500,
-            width=900,
-            showlegend=False
-        )
+    fig_migration = go.Figure() if migration_counts.empty else px.bar(
+        x=migration_counts.index, y=migration_counts.values,
+        color=migration_counts.index,
+        color_discrete_map={'not present': 'lightcoral', 'implicit': 'lightblue', 'explicit': 'lightgreen'},
+        title="Migration Intent Presence in Threads (2025)"
+    ).update_layout(
+        xaxis_title="Migration Intent", yaxis_title="Number of Threads",
+        plot_bgcolor='white', paper_bgcolor='white',
+        height=550, width=900 if is_us_only else 900, showlegend=False
+    )
     
-    # Negative Events (modified for US)
+    # Negative Events
     negative_events_df = filtered_df[filtered_df['event_type'].isin(NEGATIVE_EVENTS_REDDIT)]
     if negative_events_df.empty:
         fig_negative = go.Figure()
     else:
         if is_us_only:
-            # For United States: Event types on x-axis, single bars
             us_negative_counts = negative_events_df['event_type'].value_counts().reset_index()
-            us_negative_counts.columns = ['event_type', 'count']
             fig_negative = px.bar(
-                us_negative_counts,
-                x='event_type',
-                y='count',
-                title="Negative Events (United States, 2025)",
-                color='event_type',
-                color_discrete_sequence=px.colors.sequential.Reds
-            )
-            fig_negative.update_layout(
-                xaxis_title="Negative Event Type",
-                yaxis_title="Number of Threads",
-                plot_bgcolor='white',
-                paper_bgcolor='white',
-                height=500,
-                width=900,
-                showlegend=False
+                us_negative_counts, x='event_type', y='count', color='event_type',
+                color_discrete_sequence=px.colors.sequential.Reds,
+                title="Negative Events (United States, 2025)"
+            ).update_layout(
+                xaxis_title="Negative Event Type", yaxis_title="Number of Threads",
+                plot_bgcolor='white', paper_bgcolor='white',
+                height=550, width=900, showlegend=False
             )
         else:
-            # For other options: Countries on x-axis, stacked by event type
             negative_counts = negative_events_df.groupby(['country', 'event_type']).size().reset_index(name='count')
             fig_negative = px.bar(
-                negative_counts,
-                x='country',
-                y='count',
-                color='event_type',
-                title="Negative Events by Country (2025)",
-                barmode='stack',
+                negative_counts, x='country', y='count', color='event_type',
+                title="Negative Events by Country (2025)", barmode='stack',
                 color_discrete_sequence=px.colors.sequential.Reds
-            )
-            fig_negative.update_layout(
-                xaxis_title="Country",
-                yaxis_title="Number of Threads",
-                plot_bgcolor='white',
-                paper_bgcolor='white',
-                height=500,
-                width=900
+            ).update_layout(
+                xaxis_title="Country", yaxis_title="Number of Threads",
+                plot_bgcolor='white', paper_bgcolor='white',
+                height=550, width=900
             )
     
-    # Positive Events (modified for US)
+    # Positive Events
     positive_events_df = filtered_df[filtered_df['event_type'].isin(POSITIVE_EVENTS_REDDIT)]
     if positive_events_df.empty:
         fig_positive = go.Figure()
     else:
         if is_us_only:
-            # For United States: Event types on x-axis, single bars
             us_positive_counts = positive_events_df['event_type'].value_counts().reset_index()
-            us_positive_counts.columns = ['event_type', 'count']
             fig_positive = px.bar(
-                us_positive_counts,
-                x='event_type',
-                y='count',
-                title="Positive Events (United States, 2025)",
-                color='event_type',
-                color_discrete_sequence=px.colors.sequential.Greens
-            )
-            fig_positive.update_layout(
-                xaxis_title="Positive Event Type",
-                yaxis_title="Number of Threads",
-                plot_bgcolor='white',
-                paper_bgcolor='white',
-                height=500,
-                width=900,
-                showlegend=False
+                us_positive_counts, x='event_type', y='count', color='event_type',
+                color_discrete_sequence=px.colors.sequential.Greens,
+                title="Positive Events (United States, 2025)"
+            ).update_layout(
+                xaxis_title="Positive Event Type", yaxis_title="Number of Threads",
+                plot_bgcolor='white', paper_bgcolor='white',
+                height=550, width=900, showlegend=False
             )
         else:
-            # For other options: Countries on x-axis, stacked by event type
             positive_counts = positive_events_df.groupby(['country', 'event_type']).size().reset_index(name='count')
             fig_positive = px.bar(
-                positive_counts,
-                x='country',
-                y='count',
-                color='event_type',
-                title="Positive Events by Country (2025)",
-                barmode='stack',
+                positive_counts, x='country', y='count', color='event_type',
+                title="Positive Events by Country (2025)", barmode='stack',
                 color_discrete_sequence=px.colors.sequential.Greens
-            )
-            fig_positive.update_layout(
-                xaxis_title="Country",
-                yaxis_title="Number of Threads",
-                plot_bgcolor='white',
-                paper_bgcolor='white',
-                height=500,
-                width=900
+            ).update_layout(
+                xaxis_title="Country", yaxis_title="Number of Threads",
+                plot_bgcolor='white', paper_bgcolor='white',
+                height=550, width=900
             )
     
-    # Layout with 2 graphs per row, last one centered (unchanged)
-    return html.Div([
-        html.Div([
-            html.Div([dcc.Graph(figure=fig_sentiment)], style={'width': '50%', 'display': 'inline-block'}),
-            html.Div([dcc.Graph(figure=fig_events)], style={'width': '50%', 'display': 'inline-block'})
-        ], style={'display': 'flex', 'flex-wrap': 'wrap', 'width': '100%'}),
-        html.Div([
-            html.Div([dcc.Graph(figure=fig_migration)], style={'width': '50%', 'display': 'inline-block'}),
-            html.Div([dcc.Graph(figure=fig_negative)], style={'width': '50%', 'display': 'inline-block'})
-        ], style={'display': 'flex', 'flex-wrap': 'wrap', 'width': '100%'}),
-        html.Div([
-            html.Div([dcc.Graph(figure=fig_positive)], style={'width': '900px'})
-        ], style={'display': 'flex', 'justify-content': 'center', 'width': '100%'})
-    ])
+    # MOS Plot for United States
+    fig_mos_us = go.Figure()
+    if is_us_only:
+        mos_df = calculate_mos_reddit_us(filtered_df, df)
+        if not mos_df.empty:
+            fig_mos_us = go.Figure(data=[
+                go.Bar(name='Old MOS (2024)', x=['Old MOS (2024)'], y=[mos_df['mos_old'].values[0]], marker_color='cornflowerblue'),
+                go.Bar(name='Real-Time MOS (2025)', x=['Real-Time MOS (2025)'], y=[mos_df['mos_real_time'].values[0]], marker_color='orange')
+            ]).update_layout(
+                plot_bgcolor='white', paper_bgcolor='white',
+                title="Old MOS (2024) vs Real-Time MOS (2025) - United States",
+                yaxis_title="MOS Score", xaxis_title="Migration Opportunity Score",
+                barmode='group', height=550, width=900,
+                hovermode='x unified',
+            )
+    
+    # Layout
+    if is_us_only:
+        layout = [
+            html.Div([
+                html.Div([dcc.Graph(figure=fig_sentiment)], style={'width': '50%', 'display': 'inline-block'}),
+                html.Div([dcc.Graph(figure=fig_events)], style={'width': '50%', 'display': 'inline-block'})
+            ], style={'display': 'flex', 'flex-wrap': 'wrap', 'width': '100%'}),
+            html.Div([
+                html.Div([dcc.Graph(figure=fig_migration)], style={'width': '50%', 'display': 'inline-block'}),
+                html.Div([dcc.Graph(figure=fig_negative)], style={'width': '50%', 'display': 'inline-block'})
+            ], style={'display': 'flex', 'flex-wrap': 'wrap', 'width': '100%'}),
+            html.Div([
+                html.Div([dcc.Graph(figure=fig_positive)], style={'width': '50%', 'display': 'inline-block'}),
+                html.Div([dcc.Graph(figure=fig_mos_us)], style={'width': '50%', 'display': 'inline-block'})
+            ], style={'display': 'flex', 'flex-wrap': 'wrap', 'width': '100%'})
+        ]
+    else:
+        layout = [
+            html.Div([
+                html.Div([dcc.Graph(figure=fig_sentiment)], style={'width': '50%', 'display': 'inline-block'}),
+                html.Div([dcc.Graph(figure=fig_events)], style={'width': '50%', 'display': 'inline-block'})
+            ], style={'display': 'flex', 'flex-wrap': 'wrap', 'width': '100%'}),
+            html.Div([
+                html.Div([dcc.Graph(figure=fig_migration)], style={'width': '50%', 'display': 'inline-block'}),
+                html.Div([dcc.Graph(figure=fig_negative)], style={'width': '50%', 'display': 'inline-block'})
+            ], style={'display': 'flex', 'flex-wrap': 'wrap', 'width': '100%'}),
+            html.Div([
+                html.Div([dcc.Graph(figure=fig_positive)], style={'width': '900px'})
+            ], style={'display': 'flex', 'justify-content': 'center', 'width': '100%'})
+        ]
+    
+    return html.Div(layout)
 # MOS calculation function
 def calculate_mos(risk_df, csv_path_name, selected_countries):
     mri_mwi_2024 = df[df['year'] == 2024].copy()
@@ -732,6 +689,87 @@ def calculate_mos(risk_df, csv_path_name, selected_countries):
                             labels={'mos_value': 'MOS Score', 'mos_type': 'MOS Type'}) if not plot_df.empty else go.Figure()
     
     return fig_mos, fig_comparison
+def calculate_mos_reddit_us(filtered_df, historical_df):
+    """
+    Calculate MOS and Real-Time MOS for United States Reddit data.
+    Adapted from your provided logic.
+    """
+    if filtered_df.empty or 'United States' not in filtered_df['country'].unique():
+        return pd.DataFrame(columns=['country', 'mos', 'real_time_mos', 'migration_risk_to_uk', 'win_score'])
+
+    # Filter to US data
+    us_df = filtered_df[filtered_df['country'] == 'United States'].copy()
+
+    # Filter for negative and positive events
+    negative_events = us_df[us_df['event_type'].isin(NEGATIVE_EVENTS_REDDIT)]
+    positive_events = us_df[us_df['event_type'].isin(POSITIVE_EVENTS_REDDIT)]
+
+    total_negative_events = len(negative_events)
+    total_positive_events = len(positive_events)
+
+    # Calculate log ratio (handle division by zero)
+    neg_to_pos_ratio = total_negative_events / total_positive_events if total_positive_events > 0 else float('inf')
+    log_ratio = np.log(neg_to_pos_ratio) if neg_to_pos_ratio > 0 else 0  # Default to 0 if no positive events
+    scaled_log_ratio = np.clip(log_ratio / np.log(100), 0, 1) if neg_to_pos_ratio > 0 else 0
+
+    # Sentiment scores
+    avg_negative_sentiment_score = negative_events['sentiment'].mean() if total_negative_events > 0 else 0.0
+    avg_positive_sentiment_score = positive_events['sentiment'].mean() if total_positive_events > 0 else 0.0
+
+    # Migration intent (proportion of 'implicit' or 'explicit')
+    avg_negative_migration_intent = (negative_events['migration_present'] != "not present").mean() if total_negative_events > 0 else 0.0
+    avg_positive_migration_intent = (positive_events['migration_present'] != "not present").mean() if total_positive_events > 0 else 0.0
+    max_negative_events = total_negative_events or 1
+    max_positive_events = total_positive_events or 1
+    negative_frequency_weight = min(2.0, 1 + (total_negative_events / max_negative_events))
+    positive_frequency_weight = min(2.0, 1 + (total_positive_events / max_positive_events))
+
+    total_negative_event_severity = 0.0
+    negative_event_types = negative_events['event_type'].value_counts().to_dict()
+    for event_type, count in negative_event_types.items():
+        base_severity = EVENT_SEVERITY_WEIGHTS.get(event_type, 0.5)
+        total_negative_event_severity += base_severity * negative_frequency_weight * count
+
+    total_positive_event_severity = 0.0
+    positive_event_types = positive_events['event_type'].value_counts().to_dict()
+    for event_type, count in positive_event_types.items():
+        base_severity = EVENT_SEVERITY_WEIGHTS.get(event_type, 0.5)
+        total_positive_event_severity += base_severity * positive_frequency_weight * count
+
+    # Migration Risk and Win Score
+    migration_risk = (
+        0.5 * (avg_negative_sentiment_score / 100) +
+        0.5 * avg_negative_migration_intent
+    ) * (1 + 0.2 * scaled_log_ratio)
+
+    win_score = (
+        0.5 * (avg_positive_sentiment_score / 100) +
+        0.5 * avg_positive_migration_intent
+    ) * (1 - 0.2 * scaled_log_ratio)
+
+    # Get historical MRI and MWI for 2024
+    us_2024 = historical_df[(historical_df['country'] == 'United States') & (historical_df['year'] == 2024)]
+    if us_2024.empty:
+        logger.warning("No 2024 data for United States in annual_data_v3.1.csv; using default MOS.")
+        mos_old, mri, mwi = 0.0, 0.5, 0.5  # Defaults if missing
+    else:
+        mos_old = us_2024['MOS'].values[0]
+        mri = us_2024['MRI'].values[0]
+        mwi = us_2024['MWI'].values[0]
+
+    # Calculate Real-Time MOS
+    mos_real_time = (migration_risk * mri) - (win_score * mwi)
+
+    # Create DataFrame
+    mos_df = pd.DataFrame({
+        'country': ['United States'],
+        'mos_old': [mos_old],  # 2024 MOS from annual_data_v3.1.csv
+        'mos_real_time': [mos_real_time],  # 2025 MOS from Reddit
+        'migration_risk_to_uk': [migration_risk],
+        'win_score': [win_score]
+    })
+    logger.info(f"Calculated MOS for US: {mos_df.to_dict()}")
+    return mos_df
 def create_word_cloud_plot(df, title, text_column='title'):
     if df.empty:
         return go.Figure().update_layout(title=title)
@@ -793,7 +831,7 @@ server = app.server
 # Layout
 app.layout = html.Div([
     html.H1("VISTA Dashboard", style={'textAlign': 'center', 'color': '#ffffff', 'backgroundColor': '#1f77b4', 'padding': '20px', 'marginBottom': '0px', 'borderRadius': '5px 5px 0 0'}),
-    dcc.Tabs(id="tabs", value='real-time-sentiments', children=[
+    dcc.Tabs(id="tabs", value='historical-trends', children=[
         dcc.Tab(label='Historical Trends', value='historical-trends', style={'fontSize': '18px', 'padding': '10px'}),
         dcc.Tab(label='Real-Time Sentiments', value='real-time-sentiments', style={'fontSize': '18px', 'padding': '10px'}),
     ]),
@@ -864,7 +902,7 @@ def render_content(tab):
                 html.Div(id='csv-dropdown-container', children=[
                     html.Label("Select News Data File:", style={'fontWeight': 'bold', 'marginBottom': '5px'}),
                     dcc.Dropdown(id='csv-dropdown', options=[{'label': k, 'value': v} for k, v in CSV_OPTIONS.items()],
-                                 value=list(CSV_OPTIONS.values())[0], style={'width': '100%'})
+                                 value=list(CSV_OPTIONS.values())[1], style={'width': '100%'})
                 ], style={'width': '30%', 'padding': '5px'}),
                 html.Div([
                     html.Label("Select Data Source:", style={'fontWeight': 'bold', 'marginBottom': '5px'}),
@@ -879,7 +917,7 @@ def render_content(tab):
             html.Div(id='reddit-year-container', children=[
                 html.Label("Select Year (Reddit Only):", style={'fontWeight': 'bold', 'marginBottom': '5px'}),
                 dcc.Dropdown(id='reddit-year-dropdown', options=[{'label': year, 'value': year} for year in reddit_years],
-                             value="All Years Combined", style={'width': '100%'})
+                             value="2025", style={'width': '100%'})
             ], style={'width': '30%', 'padding': '5px', 'margin': '0 auto', 'display': 'none'}),
             html.Div(id='sentiment-graphs-container')
         ])
@@ -955,7 +993,7 @@ def update_historical_graphs(selected_countries, selected_years, selected_indica
                     legend_font_size=10,
                     margin=dict(l=40, r=40, t=40, b=40),
                     height=550,
-                    width=750,
+                    width=900,
                     plot_bgcolor='#ffffff'
                 )
             else:
@@ -974,7 +1012,7 @@ def update_historical_graphs(selected_countries, selected_years, selected_indica
                     legend_font_size=10,
                     margin=dict(l=40, r=40, t=40, b=40),
                     height=550,
-                    width=750,
+                    width=900,
                     plot_bgcolor='#ffffff'
                 )
             graph_elements.append(html.Div(dcc.Graph(figure=fig), style={'width': '50%', 'padding': '5px'}))
@@ -1032,7 +1070,7 @@ def update_historical_graphs(selected_countries, selected_years, selected_indica
                         legend_font_size=10,
                         margin=dict(l=40, r=40, t=40, b=40),
                         height=550,
-                        width=750,
+                        width=900,
                         plot_bgcolor='#ffffff'
                     )
                 else:
@@ -1049,7 +1087,7 @@ def update_historical_graphs(selected_countries, selected_years, selected_indica
                         legend_font_size=10,
                         margin=dict(l=40, r=40, t=40, b=40),
                         height=550,
-                        width=750,
+                        width=900,
                         plot_bgcolor='#ffffff'
                     )
                 graph_elements.append(html.Div(dcc.Graph(figure=fig), style={'width': '50%', 'padding': '5px'}))
@@ -1149,81 +1187,105 @@ def update_sentiment_graphs(data_source, selected_countries, csv_path, reddit_ye
     if data_source == 'news':
         news_df = load_news_data(csv_path)
         csv_path_name = [k for k, v in CSV_OPTIONS.items() if v == csv_path][0]
-        
-        # Filter news_df to rows where any selected country is in countries_detected
-        if not selected_countries:  # If no countries selected, show no data
+        if not selected_countries:
             return html.P("No countries selected.")
         filtered_df = news_df[news_df['countries_detected'].apply(lambda x: any(country in x for country in selected_countries))]
-
         if filtered_df.empty:
             return html.P("No data available for selected countries.")
 
-        # Event Detection
         events_df = detect_events(filtered_df)
-        
-        # Filter events to selected countries only (no pre-filtering to COUNTRIES_OF_INTEREST)
         events_df_filtered = events_df[events_df['countries_detected'].isin(selected_countries)]
-
-        # Positive and Negative Event Plots
         negative_events_df = events_df_filtered[events_df_filtered['event_type'].isin(NEGATIVE_EVENTS)]
         positive_events_df = events_df_filtered[events_df_filtered['event_type'].isin(POSITIVE_EVENTS)]
 
-        fig_negative_events = px.bar(negative_events_df.groupby(['countries_detected', 'event_type']).size().reset_index(name='count'),
-                                     x='countries_detected', y='count', color='event_type', title="Negative Events by Country") if not negative_events_df.empty else go.Figure()
-        fig_positive_events = px.bar(positive_events_df.groupby(['countries_detected', 'event_type']).size().reset_index(name='count'),
-                                     x='countries_detected', y='count', color='event_type', title="Positive Events by Country") if not positive_events_df.empty else go.Figure()
+        # Negative Events Plot
+        fig_negative_events = go.Figure() if negative_events_df.empty else px.bar(
+            negative_events_df.groupby(['countries_detected', 'event_type']).size().reset_index(name='count'),
+            x='countries_detected', y='count', color='event_type', title="Negative Events by Country"
+        ).update_layout(
+            plot_bgcolor='white', paper_bgcolor='white',
+            xaxis_title="Country", yaxis_title="Count",
+            height=550, width=900
+        )
 
-        # Sentiment Distribution for Positive and Negative Events
+        # Positive Events Plot
+        fig_positive_events = go.Figure() if positive_events_df.empty else px.bar(
+            positive_events_df.groupby(['countries_detected', 'event_type']).size().reset_index(name='count'),
+            x='countries_detected', y='count', color='event_type', title="Positive Events by Country"
+        ).update_layout(
+            plot_bgcolor='white', paper_bgcolor='white',
+            xaxis_title="Country", yaxis_title="Count",
+            height=550, width=900
+        )
+
+        # Sentiment Distribution
         positive_sentiment_df = positive_events_df.groupby(['countries_detected', 'sentiment']).size().reset_index(name='count')
         negative_sentiment_df = negative_events_df.groupby(['countries_detected', 'sentiment']).size().reset_index(name='count')
+        fig_positive_event_sentiment = go.Figure() if positive_sentiment_df.empty else px.bar(
+            positive_sentiment_df, x='countries_detected', y='count', color='sentiment',
+            title="Sentiment Distribution for Positive Events", barmode='stack'
+        ).update_layout(
+            plot_bgcolor='white', paper_bgcolor='white',
+            xaxis_title="Country", yaxis_title="Count",
+            height=550, width=900
+        )
+        fig_negative_event_sentiment = go.Figure() if negative_sentiment_df.empty else px.bar(
+            negative_sentiment_df, x='countries_detected', y='count', color='sentiment',
+            title="Sentiment Distribution for Negative Events", barmode='stack'
+        ).update_layout(
+            plot_bgcolor='white', paper_bgcolor='white',
+            xaxis_title="Country", yaxis_title="Count",
+            height=550, width=900
+        )
 
-        fig_positive_event_sentiment = px.bar(positive_sentiment_df, x='countries_detected', y='count', color='sentiment',
-                                              title="Sentiment Distribution for Positive Events", barmode='stack') if not positive_sentiment_df.empty else go.Figure()
-        fig_negative_event_sentiment = px.bar(negative_sentiment_df, x='countries_detected', y='count', color='sentiment',
-                                              title="Sentiment Distribution for Negative Events", barmode='stack') if not negative_sentiment_df.empty else go.Figure()
-
-        # Commented out Migration Intent Confidence Plots
-        # positive_migration_conf = positive_events_df.groupby('countries_detected')['migration_intent_confidence'].mean().reset_index()
-        # negative_migration_conf = negative_events_df.groupby('countries_detected')['migration_intent_confidence'].mean().reset_index()
-        # fig_positive_migration_conf = px.bar(positive_migration_conf, x='countries_detected', y='migration_intent_confidence',
-        #                                      title="Migration Intent Confidence for Positive Events", color_discrete_sequence=['green'])
-        # fig_negative_migration_conf = px.bar(negative_migration_conf, x='countries_detected', y='migration_intent_confidence',
-        #                                      title="Migration Intent Confidence for Negative Events", color_discrete_sequence=['red'])
-
-        # Risk and Win Scores (filtered to selected countries)
+        # Risk and Win Scores
         risk_df = calculate_migration_risk(events_df)
         risk_df_filtered = risk_df[risk_df['country'].isin(selected_countries)]
-        fig_risk = px.bar(risk_df_filtered, x='country', y='migration_risk_to_uk', title="Migration Risk Score by Country") if not risk_df_filtered.empty else go.Figure()
-        fig_win = px.bar(risk_df_filtered, x='country', y='win_score', title="Win Score by Country") if not risk_df_filtered.empty else go.Figure()
+        fig_risk = go.Figure() if risk_df_filtered.empty else px.bar(
+            risk_df_filtered, x='country', y='migration_risk_to_uk', title="Migration Risk Score by Country"
+        ).update_layout(
+            plot_bgcolor='white', paper_bgcolor='white',
+            xaxis_title="Country", yaxis_title="Migration Risk Score",
+            height=550, width=900
+        )
+        fig_win = go.Figure() if risk_df_filtered.empty else px.bar(
+            risk_df_filtered, x='country', y='win_score', title="Win Score by Country"
+        ).update_layout(
+            plot_bgcolor='white', paper_bgcolor='white',
+            xaxis_title="Country", yaxis_title="Win Score",
+            height=550, width=900
+        )
 
-        # MOS Plots (filtered to selected countries)
+        # MOS Plots
         fig_mos, fig_comparison = calculate_mos(risk_df, csv_path_name, selected_countries)
+        fig_mos.update_layout(
+            plot_bgcolor='white', paper_bgcolor='white',
+            xaxis_title="Country", yaxis_title="MOS Score",
+            height=550, width=900
+        )
+        fig_comparison.update_layout(
+            plot_bgcolor='white', paper_bgcolor='white',
+            xaxis_title="Country", yaxis_title="MOS Score",
+            height=550, width=900
+        )
 
+        # Word Cloud
         high_intent_df = filtered_df[filtered_df['migration_intent_confidence'] > 0.2]
         fig_word_cloud = create_word_cloud_plot(high_intent_df, f"Word Cloud - {csv_path_name}")
+        # Word cloud already uses white background via WordCloud settings
 
-        # Layout (without migration intent confidence plots)
         return html.Div([
             html.Div([dcc.Graph(figure=fig_negative_events)], style={'width': '50%', 'display': 'inline-block'}),
             html.Div([dcc.Graph(figure=fig_positive_events)], style={'width': '50%', 'display': 'inline-block'}),
             html.Div([dcc.Graph(figure=fig_negative_event_sentiment)], style={'width': '50%', 'display': 'inline-block'}),
             html.Div([dcc.Graph(figure=fig_positive_event_sentiment)], style={'width': '50%', 'display': 'inline-block'}),
-            # html.Div([dcc.Graph(figure=fig_positive_migration_conf)], style={'width': '50%', 'display': 'inline-block'}),
-            # html.Div([dcc.Graph(figure=fig_negative_migration_conf)], style={'width': '50%', 'display': 'inline-block'}),
             html.Div([dcc.Graph(figure=fig_risk)], style={'width': '50%', 'display': 'inline-block'}),
             html.Div([dcc.Graph(figure=fig_win)], style={'width': '50%', 'display': 'inline-block'}),
             html.Div([dcc.Graph(figure=fig_mos)], style={'width': '50%', 'display': 'inline-block'}),
             html.Div([dcc.Graph(figure=fig_comparison)], style={'width': '50%', 'display': 'inline-block'}),
             html.Div([
-                html.Div(
-                    [dcc.Graph(figure=fig_word_cloud)],
-                    style={'width': '800px'}  # Fixed width for the word cloud
-                )
-            ], style={
-                'display': 'flex',
-                'justifyContent': 'center',  # Center horizontally
-                'width': '100%'  # Ensure the container takes full width
-            })
+                html.Div([dcc.Graph(figure=fig_word_cloud)], style={'width': '800px'})
+            ], style={'display': 'flex', 'justify-content': 'center', 'width': '100%'})
         ], style={'display': 'flex', 'flexWrap': 'wrap'})
     else:  # Reddit
         # Filter based on country selection
@@ -1240,5 +1302,5 @@ def update_sentiment_graphs(data_source, selected_countries, csv_path, reddit_ye
         return plot_reddit_graphs(filtered_df, reddit_year)
 
 if __name__ == '__main__':
-    #app.run(debug=True)
+    # app.run(debug=True)
     app.run(host='0.0.0.0', port=8050)
