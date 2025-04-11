@@ -51,8 +51,8 @@ except FileNotFoundError as e:
 
 # CSV file options for news data
 CSV_OPTIONS = {
-    '29 March': 'data/analysed_articles_29_march.csv',
-    '8 April': 'data/analysed_articles_8_april.csv'
+    '29 March': 'data/analysed_articles_29_march_filtered.csv',
+    '8 April': 'data/analysed_articles_8_april_filtered.csv'
 }
 
 # Function to load news data
