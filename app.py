@@ -521,7 +521,7 @@ def plot_reddit_graphs(filtered_df, selected_year):
         xaxis_title="Sentiment Score (0 to 100)", yaxis_title="Number of Threads",
         plot_bgcolor='white', paper_bgcolor='white',
         xaxis=dict(tickmode='linear', dtick=5, range=[0, 100]),
-        height=550, width=900 if is_us_only else 900  # Adjust width for US case
+        height=450, width=750 if is_us_only else 750  # Adjust width for US case
     )
     
     # Event Distribution
@@ -538,7 +538,7 @@ def plot_reddit_graphs(filtered_df, selected_year):
             ).update_layout(
                 xaxis_title="Event Type", yaxis_title="Number of Threads",
                 plot_bgcolor='white', paper_bgcolor='white',
-                height=550, width=900, showlegend=False
+                height=450, width=750, showlegend=False
             )
         else:
             fig_events = px.bar(
@@ -547,7 +547,7 @@ def plot_reddit_graphs(filtered_df, selected_year):
             ).update_layout(
                 xaxis_title="Country", yaxis_title="Number of Threads",
                 plot_bgcolor='white', paper_bgcolor='white',
-                height=550, width=900
+                height=450, width=750
             )
     
     # Migration Intent Presence
@@ -560,7 +560,7 @@ def plot_reddit_graphs(filtered_df, selected_year):
     ).update_layout(
         xaxis_title="Migration Intent", yaxis_title="Number of Threads",
         plot_bgcolor='white', paper_bgcolor='white',
-        height=550, width=900 if is_us_only else 900, showlegend=False
+        height=450, width=750 if is_us_only else 750, showlegend=False
     )
     
     # Negative Events
@@ -577,7 +577,7 @@ def plot_reddit_graphs(filtered_df, selected_year):
             ).update_layout(
                 xaxis_title="Negative Event Type", yaxis_title="Number of Threads",
                 plot_bgcolor='white', paper_bgcolor='white',
-                height=550, width=900, showlegend=False
+                height=450, width=750, showlegend=False
             )
         else:
             negative_counts = negative_events_df.groupby(['country', 'event_type']).size().reset_index(name='count')
@@ -588,7 +588,7 @@ def plot_reddit_graphs(filtered_df, selected_year):
             ).update_layout(
                 xaxis_title="Country", yaxis_title="Number of Threads",
                 plot_bgcolor='white', paper_bgcolor='white',
-                height=550, width=900
+                height=450, width=750
             )
     
     # Positive Events
@@ -605,7 +605,7 @@ def plot_reddit_graphs(filtered_df, selected_year):
             ).update_layout(
                 xaxis_title="Positive Event Type", yaxis_title="Number of Threads",
                 plot_bgcolor='white', paper_bgcolor='white',
-                height=550, width=900, showlegend=False
+                height=450, width=750, showlegend=False
             )
         else:
             positive_counts = positive_events_df.groupby(['country', 'event_type']).size().reset_index(name='count')
@@ -616,7 +616,7 @@ def plot_reddit_graphs(filtered_df, selected_year):
             ).update_layout(
                 xaxis_title="Country", yaxis_title="Number of Threads",
                 plot_bgcolor='white', paper_bgcolor='white',
-                height=550, width=900
+                height=450, width=750
             )
     
     # MOS Plot for United States
@@ -631,7 +631,7 @@ def plot_reddit_graphs(filtered_df, selected_year):
                 plot_bgcolor='white', paper_bgcolor='white',
                 title="Old MOS (2024) vs Real-Time MOS (2025) - United States",
                 yaxis_title="MOS Score", xaxis_title="Migration Opportunity Score",
-                barmode='group', height=550, width=900,
+                barmode='group', height=450, width=750,
                 hovermode='x unified',
             )
     
@@ -992,8 +992,8 @@ def update_historical_graphs(selected_countries, selected_years, selected_indica
                     title_font_size=14,
                     legend_font_size=10,
                     margin=dict(l=40, r=40, t=40, b=40),
-                    height=550,
-                    width=900,
+                    height=450,
+                    width=750,
                     plot_bgcolor='#ffffff'
                 )
             else:
@@ -1011,8 +1011,8 @@ def update_historical_graphs(selected_countries, selected_years, selected_indica
                     title_font_size=14,
                     legend_font_size=10,
                     margin=dict(l=40, r=40, t=40, b=40),
-                    height=550,
-                    width=900,
+                    height=450,
+                    width=750,
                     plot_bgcolor='#ffffff'
                 )
             graph_elements.append(html.Div(dcc.Graph(figure=fig), style={'width': '50%', 'padding': '5px'}))
@@ -1069,8 +1069,8 @@ def update_historical_graphs(selected_countries, selected_years, selected_indica
                         title_font_size=14,
                         legend_font_size=10,
                         margin=dict(l=40, r=40, t=40, b=40),
-                        height=550,
-                        width=900,
+                        height=450,
+                        width=750,
                         plot_bgcolor='#ffffff'
                     )
                 else:
@@ -1086,8 +1086,8 @@ def update_historical_graphs(selected_countries, selected_years, selected_indica
                         title_font_size=14,
                         legend_font_size=10,
                         margin=dict(l=40, r=40, t=40, b=40),
-                        height=550,
-                        width=900,
+                        height=450,
+                        width=750,
                         plot_bgcolor='#ffffff'
                     )
                 graph_elements.append(html.Div(dcc.Graph(figure=fig), style={'width': '50%', 'padding': '5px'}))
@@ -1231,7 +1231,7 @@ def update_sentiment_graphs(data_source, selected_countries, csv_path, reddit_ye
         ).update_layout(
             plot_bgcolor='white', paper_bgcolor='white',
             xaxis_title="Country", yaxis_title="Count",
-            height=550, width=900
+            height=450, width=750
         )
 
         # Positive Events Plot
@@ -1241,7 +1241,7 @@ def update_sentiment_graphs(data_source, selected_countries, csv_path, reddit_ye
         ).update_layout(
             plot_bgcolor='white', paper_bgcolor='white',
             xaxis_title="Country", yaxis_title="Count",
-            height=550, width=900
+            height=450, width=750
         )
 
         # Sentiment Distribution
@@ -1253,7 +1253,7 @@ def update_sentiment_graphs(data_source, selected_countries, csv_path, reddit_ye
         ).update_layout(
             plot_bgcolor='white', paper_bgcolor='white',
             xaxis_title="Country", yaxis_title="Count",
-            height=550, width=900
+            height=450, width=750
         )
         fig_negative_event_sentiment = go.Figure() if negative_sentiment_df.empty else px.bar(
             negative_sentiment_df, x='countries_detected', y='count', color='sentiment',
@@ -1261,7 +1261,7 @@ def update_sentiment_graphs(data_source, selected_countries, csv_path, reddit_ye
         ).update_layout(
             plot_bgcolor='white', paper_bgcolor='white',
             xaxis_title="Country", yaxis_title="Count",
-            height=550, width=900
+            height=450, width=750
         )
 
         # Risk and Win Scores
@@ -1272,14 +1272,14 @@ def update_sentiment_graphs(data_source, selected_countries, csv_path, reddit_ye
         ).update_layout(
             plot_bgcolor='white', paper_bgcolor='white',
             xaxis_title="Country", yaxis_title="Migration Risk Score",
-            height=550, width=900
+            height=450, width=750
         )
         fig_win = go.Figure() if risk_df_filtered.empty else px.bar(
             risk_df_filtered, x='country', y='win_score', title="Win Score by Country"
         ).update_layout(
             plot_bgcolor='white', paper_bgcolor='white',
             xaxis_title="Country", yaxis_title="Win Score",
-            height=550, width=900
+            height=450, width=750
         )
 
         # MOS Plots
@@ -1287,12 +1287,12 @@ def update_sentiment_graphs(data_source, selected_countries, csv_path, reddit_ye
         fig_mos.update_layout(
             plot_bgcolor='white', paper_bgcolor='white',
             xaxis_title="Country", yaxis_title="MOS Score",
-            height=550, width=900
+            height=450, width=750
         )
         fig_comparison.update_layout(
             plot_bgcolor='white', paper_bgcolor='white',
             xaxis_title="Country", yaxis_title="MOS Score",
-            height=550, width=900
+            height=450, width=750
         )
 
         # Word Cloud
