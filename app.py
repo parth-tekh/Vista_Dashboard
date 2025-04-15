@@ -1000,7 +1000,7 @@ def update_historical_graphs(selected_countries, selected_years, selected_indica
                         fig.add_trace(go.Bar(
                             x=[country],
                             y=country_df[metric],
-                            name=f"{country} - {metric}",
+                            name=f"{country}",
                             legendgroup=country,
                             showlegend=True,
                             marker_color=color
@@ -1028,7 +1028,7 @@ def update_historical_graphs(selected_countries, selected_years, selected_indica
                             x=country_df['year'],
                             y=country_df[metric],
                             mode='lines+markers',
-                            name=f"{country} - {metric}",
+                            name=f"{country}",
                             line=dict(dash=line_style, color=color),  # Use COUNTRY_COLORS
                             legendgroup=country,
                             showlegend=True
