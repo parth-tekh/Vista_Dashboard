@@ -1305,8 +1305,8 @@ def update_sentiment_graphs(data_source, selected_countries, csv_path, reddit_ye
             html.Div([dcc.Graph(figure=fig_positive_events)], style={'width': '50%', 'display': 'inline-block'}),
             html.Div([dcc.Graph(figure=fig_negative_event_sentiment)], style={'width': '50%', 'display': 'inline-block'}),
             html.Div([dcc.Graph(figure=fig_positive_event_sentiment)], style={'width': '50%', 'display': 'inline-block'}),
-            html.Div([dcc.Graph(figure=fig_risk)], style={'width': '50%', 'display': 'inline-block'}),
-            html.Div([dcc.Graph(figure=fig_win)], style={'width': '50%', 'display': 'inline-block'}),
+            # html.Div([dcc.Graph(figure=fig_risk)], style={'width': '50%', 'display': 'inline-block'}),
+            # html.Div([dcc.Graph(figure=fig_win)], style={'width': '50%', 'display': 'inline-block'}),
             html.Div([dcc.Graph(figure=fig_mos)], style={'width': '50%', 'display': 'inline-block'}),
             html.Div([dcc.Graph(figure=fig_comparison)], style={'width': '50%', 'display': 'inline-block'}),
             html.Div([
