@@ -25,6 +25,19 @@ logger = logging.getLogger(__name__)
 # Define countries of interest
 COUNTRIES_OF_INTEREST = ['Brazil', 'Jordan', 'Peru', 'Colombia', 'Japan', 'Norway', 'Indonesia', 'Thailand', 'Guyana', 'United States']
 COUNTRIES_OF_INTEREST_REDDIT = ['Brazil', 'Jordan', 'Peru', 'Colombia', 'Japan', 'Norway', 'Indonesia', 'Thailand', 'Guyana']
+COUNTRY_COLORS = {
+    'Brazil': '#1F77B4',         # Blue
+    'Jordan': '#FF7F0E',         # Orange
+    'Peru': '#2CA02C',           # Green
+    'Colombia': '#D62728',       # Red
+    'Japan': '#9467BD',          # Purple
+    'Norway': '#8C564B',         # Brown
+    'Indonesia': '#E377C2',      # Pink
+    'Thailand': '#7F7F7F',       # Gray
+    'Guyana': '#BCBD22',         # Olive
+    'United States': '#17BECF',  # Teal
+    'United Kingdom': '#AEC7E8'  # Light Blue 
+}
 # Define event types
 NEGATIVE_EVENTS = ['Social Unrest', 'Economic Crisis', 'Political Instability', 'Conflict', 'Natural Disaster']
 POSITIVE_EVENTS = ['Economic Recovery', 'Policy Reform', 'Social Improvement', 'Peace Resolution']
@@ -943,6 +956,9 @@ def update_historical_graphs(selected_countries, selected_years, selected_indica
                 (df['year'].isin(selected_years))
             ]
 
+        # Log the unique countries in filtered_df to verify UK presence
+        logger.info(f"Unique countries in filtered_df: {filtered_df['country'].unique().tolist()}")
+
         required_columns = set(selected_main_metrics + selected_indicators)
         missing_columns = required_columns - set(filtered_df.columns)
         if missing_columns:
@@ -959,11 +975,9 @@ def update_historical_graphs(selected_countries, selected_years, selected_indica
 
         main_metrics_graphs = []
         metric_groups = []
-        # Group MWI and MRI together if both or either is selected
         mwi_mri_metrics = [metric for metric in ['MWI', 'MRI'] if metric in selected_main_metrics]
         if mwi_mri_metrics:
             metric_groups.append(('MWI_MRI', mwi_mri_metrics))
-        # Add other metrics individually
         other_metrics = [metric for metric in selected_main_metrics if metric not in ['MWI', 'MRI']]
         for metric in other_metrics:
             metric_groups.append((metric, [metric]))
@@ -982,9 +996,17 @@ def update_historical_graphs(selected_countries, selected_years, selected_indica
                 for metric in metrics:
                     for country in filtered_df['country'].unique():
                         country_df = filtered_df[filtered_df['country'] == country]
-                        fig.add_trace(go.Bar(x=[country], y=country_df[metric], name=f"{country} - {metric}", legendgroup=country, showlegend=True))
+                        color = COUNTRY_COLORS.get(country, '#1F77B4')  # Default to blue if country not in mapping
+                        fig.add_trace(go.Bar(
+                            x=[country],
+                            y=country_df[metric],
+                            name=f"{country} - {metric}",
+                            legendgroup=country,
+                            showlegend=True,
+                            marker_color=color
+                        ))
                 fig.update_layout(
-                    barmode='group',  # Always group bars, even for MWI_MRI
+                    barmode='group',
                     title="MWI and MRI" if group_name == 'MWI_MRI' else f"{metrics[0]}",
                     xaxis_title="Country",
                     yaxis_title="Value",
@@ -992,8 +1014,8 @@ def update_historical_graphs(selected_countries, selected_years, selected_indica
                     title_font_size=14,
                     legend_font_size=10,
                     margin=dict(l=40, r=40, t=40, b=40),
-                    height=450,
-                    width=750,
+                    height=550,
+                    width=900,
                     plot_bgcolor='#ffffff'
                 )
             else:
@@ -1001,7 +1023,16 @@ def update_historical_graphs(selected_countries, selected_years, selected_indica
                     for country in filtered_df['country'].unique():
                         country_df = filtered_df[filtered_df['country'] == country]
                         line_style = 'dot' if metric == 'MRI' else 'solid'
-                        fig.add_trace(go.Scatter(x=country_df['year'], y=country_df[metric], mode='lines+markers', name=f"{country} - {metric}", line=dict(dash=line_style), legendgroup=country, showlegend=True))
+                        color = COUNTRY_COLORS.get(country, '#1F77B4')  # Default to blue if country not in mapping
+                        fig.add_trace(go.Scatter(
+                            x=country_df['year'],
+                            y=country_df[metric],
+                            mode='lines+markers',
+                            name=f"{country} - {metric}",
+                            line=dict(dash=line_style, color=color),  # Use COUNTRY_COLORS
+                            legendgroup=country,
+                            showlegend=True
+                        ))
                 fig.update_layout(
                     title="MWI and MRI (MWI: Solid, MRI: Dotted)" if group_name == 'MWI_MRI' else f"{metrics[0]}",
                     xaxis_title="Year",
@@ -1011,8 +1042,8 @@ def update_historical_graphs(selected_countries, selected_years, selected_indica
                     title_font_size=14,
                     legend_font_size=10,
                     margin=dict(l=40, r=40, t=40, b=40),
-                    height=450,
-                    width=750,
+                    height=550,
+                    width=900,
                     plot_bgcolor='#ffffff'
                 )
             graph_elements.append(html.Div(dcc.Graph(figure=fig), style={'width': '50%', 'padding': '5px'}))
@@ -1059,7 +1090,15 @@ def update_historical_graphs(selected_countries, selected_years, selected_indica
                 if single_year:
                     for country in filtered_df['country'].unique():
                         country_df = filtered_df[filtered_df['country'] == country]
-                        fig.add_trace(go.Bar(x=[country], y=country_df[indicator], name=country, legendgroup=country, showlegend=True))
+                        color = COUNTRY_COLORS.get(country, '#1F77B4')  # Default to blue if country not in mapping
+                        fig.add_trace(go.Bar(
+                            x=[country],
+                            y=country_df[indicator],
+                            name=country,
+                            legendgroup=country,
+                            showlegend=True,
+                            marker_color=color  # Use COUNTRY_COLORS
+                        ))
                     fig.update_layout(
                         barmode='group',
                         title=f"{indicator}",
@@ -1069,14 +1108,23 @@ def update_historical_graphs(selected_countries, selected_years, selected_indica
                         title_font_size=14,
                         legend_font_size=10,
                         margin=dict(l=40, r=40, t=40, b=40),
-                        height=450,
-                        width=750,
+                        height=550,
+                        width=900,
                         plot_bgcolor='#ffffff'
                     )
                 else:
                     for country in filtered_df['country'].unique():
                         country_df = filtered_df[filtered_df['country'] == country]
-                        fig.add_trace(go.Scatter(x=country_df['year'], y=country_df[indicator], mode='lines+markers', name=country, legendgroup=country, showlegend=True))
+                        color = COUNTRY_COLORS.get(country, '#1F77B4')  # Default to blue if country not in mapping
+                        fig.add_trace(go.Scatter(
+                            x=country_df['year'],
+                            y=country_df[indicator],
+                            mode='lines+markers',
+                            name=country,
+                            line=dict(color=color),  # Use COUNTRY_COLORS
+                            legendgroup=country,
+                            showlegend=True
+                        ))
                     fig.update_layout(
                         title=f"{indicator} Over Time",
                         xaxis_title="Year",
@@ -1086,8 +1134,8 @@ def update_historical_graphs(selected_countries, selected_years, selected_indica
                         title_font_size=14,
                         legend_font_size=10,
                         margin=dict(l=40, r=40, t=40, b=40),
-                        height=450,
-                        width=750,
+                        height=550,
+                        width=900,
                         plot_bgcolor='#ffffff'
                     )
                 graph_elements.append(html.Div(dcc.Graph(figure=fig), style={'width': '50%', 'padding': '5px'}))
