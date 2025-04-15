@@ -167,7 +167,7 @@ metric_descriptions = {
         'description': (
             'The Migration Win Index (MWI) captures positive migration attributes, such as compliance, economic stability, and beneficial bilateral relations:\n'
             'The MWI is calculated as:\n'
-            'MWI = (0.3333 × Economic Stability) + (0.3333 × Trade Relations) + (0.3333 × Human Capital)'
+            ' MWI = (0.3333 × Economic Stability) + (0.3333 × Trade Relations) + (0.3333 × Human Capital)\n''
         )
     },
     'ESS':{
@@ -183,7 +183,7 @@ metric_descriptions = {
     'HCM':{
         'name': 'Human Capital Metrics (HCM):',
         'description': (
-            ' HCM = (0.5 × Avg. Education Length) + (0.5 × English Proficiency Score)
+            ' HCM = (0.5 × Avg. Education Length) + (0.5 × English Proficiency Score)\n')
     },
     'asylum_applications': {
         'name': 'Asylum Applications',
