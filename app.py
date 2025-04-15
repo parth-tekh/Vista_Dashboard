@@ -183,7 +183,7 @@ metric_descriptions = {
     'HCM':{
         'name': 'Human Capital Metrics (HCM):',
         'description': (
-            ' EPS = (0.3333 × Unemployment) + (0.3333 × Working Poverty) + 0.3333 × (1 - GDP Growth)\n')
+            ' HCM = (0.5 × Avg. Education Length) + (0.5 × English Proficiency Score)
     },
     'asylum_applications': {
         'name': 'Asylum Applications',
