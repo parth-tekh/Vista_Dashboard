@@ -675,7 +675,7 @@ def plot_reddit_graphs(filtered_df, selected_year):
                 html.Div([dcc.Graph(figure=fig_negative)], style={'width': '50%', 'display': 'inline-block'})
             ], style={'display': 'flex', 'flex-wrap': 'wrap', 'width': '100%'}),
             html.Div([
-                html.Div([dcc.Graph(figure=fig_positive)], style={'width': '900px'})
+                html.Div([dcc.Graph(figure=fig_positive)], style={'width': '750px'})
             ], style={'display': 'flex', 'justify-content': 'center', 'width': '100%'})
         ]
     
@@ -1014,8 +1014,8 @@ def update_historical_graphs(selected_countries, selected_years, selected_indica
                     title_font_size=14,
                     legend_font_size=10,
                     margin=dict(l=40, r=40, t=40, b=40),
-                    height=550,
-                    width=900,
+                    height=450,
+                    width=750,
                     plot_bgcolor='#ffffff'
                 )
             else:
@@ -1042,8 +1042,8 @@ def update_historical_graphs(selected_countries, selected_years, selected_indica
                     title_font_size=14,
                     legend_font_size=10,
                     margin=dict(l=40, r=40, t=40, b=40),
-                    height=550,
-                    width=900,
+                    height=450,
+                    width=750,
                     plot_bgcolor='#ffffff'
                 )
             graph_elements.append(html.Div(dcc.Graph(figure=fig), style={'width': '50%', 'padding': '5px'}))
@@ -1108,8 +1108,8 @@ def update_historical_graphs(selected_countries, selected_years, selected_indica
                         title_font_size=14,
                         legend_font_size=10,
                         margin=dict(l=40, r=40, t=40, b=40),
-                        height=550,
-                        width=900,
+                        height=450,
+                        width=750,
                         plot_bgcolor='#ffffff'
                     )
                 else:
@@ -1134,8 +1134,8 @@ def update_historical_graphs(selected_countries, selected_years, selected_indica
                         title_font_size=14,
                         legend_font_size=10,
                         margin=dict(l=40, r=40, t=40, b=40),
-                        height=550,
-                        width=900,
+                        height=450,
+                        width=750,
                         plot_bgcolor='#ffffff'
                     )
                 graph_elements.append(html.Div(dcc.Graph(figure=fig), style={'width': '50%', 'padding': '5px'}))
